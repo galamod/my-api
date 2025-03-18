@@ -26,40 +26,8 @@ var dbUrl = builder.Configuration.GetConnectionString("DefaultConnection")
 
 Console.WriteLine($"DATABASE_URL from environment: {dbUrl}");
 
-string connectionString;
-
-if (dbUrl.StartsWith("postgres://"))
-{
-    connectionString = ConvertPostgresUrlToConnectionString(dbUrl);
-}
-else
-{
-    connectionString = dbUrl; // Если уже в правильном формате, просто используем его.
-}
-
 builder.Services.AddDbContext<LicenseDbContext>(options =>
-    options.UseNpgsql(connectionString));
-
-static string ConvertPostgresUrlToConnectionString(string url)
-{
-    try
-    {
-        var uri = new Uri(url);
-        var host = uri.Host;
-        var port = uri.Port > 0 ? uri.Port : 5432;
-        var database = uri.AbsolutePath.TrimStart('/');
-        var userInfo = uri.UserInfo.Split(':');
-        var username = userInfo[0];
-        var password = userInfo.Length > 1 ? userInfo[1] : "";
-
-        return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true;";
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error parsing DATABASE_URL: {ex.Message}");
-        throw;
-    }
-}
+    options.UseNpgsql(dbUrl));
 
 builder.Services.AddEndpointsApiExplorer();
 
