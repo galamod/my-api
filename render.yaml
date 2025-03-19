@@ -10,6 +10,6 @@ services:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
       - key: DATABASE_URL
-        value: "Host=ep-shy-fog-a9mzxt8k-pooler.gwc.azure.neon.tech;Port=5432;Database=neondb;Username=neondb_owner;Password=npg_ImDzG2WxK6Ue;SSL Mode=Require;Trust Server Certificate=true;"
+        value: "Host=ep-purple-firefly-a289919a.eu-central-1.pg.koyeb.app;Port=5432;Database=koyebdb;Username=galabot-adm;Password=npg_6MEq5txbzkDF;SSL Mode=Require;Trust Server Certificate=true;"
     healthCheckPath: /
     startCommand: "dotnet Api.dll"
