@@ -37,6 +37,9 @@ app.UseCors("AllowSpecificOrigins");
 
 app.UseHttpsRedirection();
 
+// ✅ Keep-alive эндпоинт
+app.MapGet("/api/ping", () => Results.Ok("Server is alive"));
+
 // ✅ Получить все ключи
 app.MapGet("/api/licenses", async (LicenseDbContext db) =>
     await db.LicenseKeys.ToListAsync());
