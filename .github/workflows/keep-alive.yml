@@ -1,0 +1,13 @@
+name: Keep Alive
+
+on:
+  schedule:
+    - cron: "*/1 * * * *"  # Запускается каждые 5 минут
+  workflow_dispatch:  # Позволяет запустить вручную из GitHub Actions
+
+jobs:
+  keep-server-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping server
+        run: curl -s -o /dev/null "https://galabot-api.koyeb.app/api/licenses"
