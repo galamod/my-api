@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Api;
 using Microsoft.EntityFrameworkCore;
 
@@ -77,6 +79,49 @@ app.MapDelete("/api/licenses/{id}", async (int id, LicenseDbContext db) =>
     return Results.NoContent();
 });
 
+app.MapPost("/api/fingerprint", (ClientFingerprintData data) =>
+{
+    string rawData = $"{data.IPJson}|{data.ScreenResolution}|{data.Timezone}";
+    string fingerprint = ComputeSha256Hash(rawData);
+    return Results.Ok(fingerprint);
+});
+
+app.MapGet("/api/licenses/trial/{fingerprint}", async (string fingerprint, LicenseDbContext db) =>
+{
+    var license = await db.LicenseKeys.FirstOrDefaultAsync(l => l.UserIdentifier == fingerprint);
+
+    if (license == null)
+    {
+        var newTrial = new LicenseKey
+        {
+            UserIdentifier = fingerprint,
+            TrialStart = DateTime.UtcNow,
+            ExpirationDate = DateTime.UtcNow.AddHours(1)
+        };
+        db.LicenseKeys.Add(newTrial);
+        await db.SaveChangesAsync();
+        return Results.Ok(newTrial);
+    }
+
+    if (license.ExpirationDate > DateTime.UtcNow)
+        return Results.Ok(license);
+
+    return Results.BadRequest("Тестовый период истёк.");
+});
+
+
+static string ComputeSha256Hash(string rawData)
+{
+    using (SHA256 sha256Hash = SHA256.Create())
+    {
+        byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
+        StringBuilder builder = new StringBuilder();
+        foreach (byte b in bytes)
+            builder.Append(b.ToString("x2"));
+
+        return builder.ToString();
+    }
+}
 
 // Автоматическая миграция базы
 using (var scope = app.Services.CreateScope())
